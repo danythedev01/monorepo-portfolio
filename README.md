@@ -1,6 +1,6 @@
 # 📘 Portfolio Distributed Architecture — Roadmap v0.4
 
-# ✅ Phase 0 — Repo & Shared Foundations (Learn once, reuse everywhere)
+## ✅ Phase 0 — Repo & Shared Foundations (Learn once, reuse everywhere)
 
 ### Monorepo Setup
 
@@ -27,7 +27,7 @@
 
 ---
 
-# 🧵 Phase 1 — Kafka Foundation (One time learning, multi-service reuse)
+## 🧵 Phase 1 — Kafka Foundation (One time learning, multi-service reuse)
 
 ### Shared Kafka Client
 
@@ -48,7 +48,7 @@
 
 ---
 
-# 🔐 Phase 2 — Auth + API Gateway
+## 🔐 Phase 2 — Auth + API Gateway
 
 ### Auth Service (NestJS)
 
@@ -66,7 +66,7 @@
 
 ---
 
-# 👤 Phase 3 — User Profile & Settings Panel
+## 👤 Phase 3 — User Profile & Settings Panel
 
 ### Backend Work
 
@@ -91,7 +91,7 @@
 
 ---
 
-# 🧾 Phase 4 — Audit Log Service (Ts.ED)
+## 🧾 Phase 4 — Audit Log Service (Ts.ED)
 
 ### Audit Service
 
@@ -107,11 +107,11 @@
 
 ---
 
-# 🔔 Phase 5 — Notification Templates (NestJS + SES)
+## 🔔 Phase 5 — Notification Templates (NestJS + Amazon SES)
 
 ### Notification Service Enhancements
 
-- [ ] Add simple template engine (EJS/Handlebars)
+- [ ] Add simple template engine (Pug)
 - [ ] Create templates:
   - [ ] Welcome email
   - [ ] Profile updated email
@@ -120,29 +120,29 @@
 
 ---
 
-# 🚩 Phase 6 — Feature Flags (Ts.ED)
+## 🚩 Phase 6 — Feature Flags (Ts.ED)
 
-### Backend
+### Backend Ts.ED
 
 - [ ] `GET /flags` for current flags
 - [ ] `POST /flags` to update flags
 - [ ] Store flags in DynamoDB
 
-### Frontend
+### Frontend MFE3
 
 - [ ] Load flags on app startup
 - [ ] Show/hide MFE3 based on `enableMFE3` flag
 
 ---
 
-# 📊 Phase 7 — Public API Dashboard + Observability
+## 📊 Phase 7 — Public API Dashboard + Observability
 
-### Backend
+### Backend API Dashboard
 
 - [ ] Add `/system/status` endpoint in API Gateway
 - [ ] Basic health checks for services
 
-### Frontend
+### Frontend API Dashboard
 
 - [ ] Create "API Dashboard" page
 - [ ] Show:
@@ -160,7 +160,7 @@
 
 ---
 
-# 🧪 Phase 8 — CI/CD Basics
+## 🧪 Phase 8 — CI/CD Basics
 
 ### GitHub Actions
 
@@ -180,6 +180,6 @@
 
 ---
 
-# 🏁 End of Roadmap v0.4
+## 🏁 End of Roadmap v0.4
 
 This file will evolve into **ROADMAP v1.0** once foundational services are built.
