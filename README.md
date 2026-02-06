@@ -94,6 +94,50 @@ curl -X POST http://localhost:3000/orders \
 6. billing logs:
    Billing user with stripe ID ... a price of $...
 
+```mermaid
+
+sequenceDiagram
+
+autonumber
+
+participant C as Client (curl)
+
+participant AG as api-gateway (NestJS HTTP)
+
+participant K as Kafka Broker
+
+participant B as billing (NestJS Microservice)
+
+participant A as auth (NestJS Microservice)
+
+
+
+C->>AG: POST orders { orderId, userId, price }
+
+AG->>K: Publish Event: order_created (payload: orderId, userId, price)
+
+
+
+K-->>B: Consume Event: order_created (consumer group: billing-consumer)
+
+B->>K: RPC Request: get_user (payload: userId)
+
+K-->>A: Consume RPC: get_user (consumer group: auth-consumer)
+
+A-->>K: RPC Response: user (payload: userId, stripeId, ...)
+
+
+
+K-->>B: Deliver RPC Response: user
+
+B->>B: Process billing logic Log: "Billing user with stripe ID ..."
+
+AG-->>C: 201 Created 200 OK (order accepted)
+
+
+
+```
+
 Important
 
 - order_created is implemented as an event (emit + @EventPattern)
