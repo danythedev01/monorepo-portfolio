@@ -1,185 +1,145 @@
-# 📘 Portfolio Distributed Architecture — Roadmap v0.4
+# Event-Driven POC (NestJS + Kafka)
 
-## ✅ Phase 0 — Repo & Shared Foundations (Learn once, reuse everywhere)
+POC for asynchronous communication between microservices using Kafka as the message broker and NestJS Microservices as the application framework.
 
-### Monorepo Setup
+This repository contains three independent applications that execute a complete end-to-end workflow triggered via HTTP.
 
-- [ ] Create monorepo using Nx or PNPM workspaces
-- [ ] Create folder structure:
-  - `/apps/api-gateway-nest`
-  - `/apps/user-service-nest`
-  - `/apps/media-service-nest`
-  - `/apps/notification-service-nest`
-  - `/apps/graphql-service-tsed`
-  - `/apps/audit-service-tsed`
-  - `/apps/feature-flags-tsed`
-  - `/apps/frontend-react`
-  - `/apps/dashboard-vue`
-  - `/libs/shared-config`
-  - `/libs/shared-types`
-  - `/libs/shared-kafka`
+## Get Started
 
-### Shared Libraries
+For demonstration purposes, a `~/projects` directory was created as the working root. You may use any directory structure you prefer—just adjust the commands accordingly.
 
-- [ ] `/libs/shared-config` → typed env loader (Zod recommended)
-- [ ] `/libs/shared-types` → DTOs, event types, shared interfaces
-- [ ] Add global tsconfig paths
+## Running the Application
 
----
+Open three terminal sessions and start each service independently.
 
-## 🧵 Phase 1 — Kafka Foundation (One time learning, multi-service reuse)
+1. api-gateway
 
-### Shared Kafka Client
+```bash
+cd api-gateway
+npm install
+npm run start
+```
 
-- [ ] Create `/libs/shared-kafka`
-- [ ] Export `createKafkaProducer(config)`
-- [ ] Export `createKafkaConsumer(config, topics, handler)`
-- [ ] Write README explaining usage for both NestJS and Ts.ED
+2. billing
 
-### Integrate Kafka into NestJS (User Service)
+```bash
+cd billing
+npm install
+npm run start
+```
 
-- [ ] Publish `UserCreated` event
-- [ ] Publish `UserUpdated` event
+3. auth
 
-### Integrate Kafka into Ts.ED (Audit Service)
+```bash
+cd auth
+npm install
+npm run start
+```
 
-- [ ] Consume `UserCreated`, `UserUpdated`
-- [ ] Store entries (start with in-memory storage, later DynamoDB)
+### Create an Order (Trigger the Flow)
 
----
+```bash
+curl -X POST http://localhost:3000/orders \
+  -H "Content-Type: application/json" \
+  -d '{
+    "orderId": "123",
+    "userId": "daniel",
+    "price": "12.3"
+  }'
+```
 
-## 🔐 Phase 2 — Auth + API Gateway
+### Architecture
 
-### Auth Service (NestJS)
+#### Services
 
-- [ ] Implement `/auth/login` (JWT)
-- [ ] Implement `/auth/refresh` (optional)
-- [ ] Implement RBAC roles
-- [ ] Add JWT Guard + Role Guard
+- api-gateway
+  - Exposes POST /orders
+  - Publishes the order_created event to Kafka
 
-### API Gateway (NestJS)
+- billing
+  - Consumes the order_created event
+  - Requests user information from auth using Kafka request/response
+  - Logs the result, simulating a billing/charging operation
 
-- [ ] Forward `/api/users/*` → User Service
-- [ ] Forward `/api/media/*` → Media Service
-- [ ] Forward `/api/graphql` → GraphQL Service
-- [ ] Apply global JWT validation guard
+- auth
+  - Responds to get_user requests with an in-memory (mocked) user
+  - Logs the resolved user information
 
----
+#### Kafka Topics / Messaging Patterns
 
-## 👤 Phase 3 — User Profile & Settings Panel
+##### Topics
 
-### Backend Work
+- order_created (event)
 
-- [ ] Add `GET /users/me`
-- [ ] Add `PUT /users/me`
-- [ ] Add fields: name, email, language, dark mode
-- [ ] Emit `UserUpdated` event on profile change
+- get_user (request/response)
 
-### Media Service & S3
+##### Consumer Groups (current)
 
-- [ ] `POST /media/avatar/presign`
-- [ ] Direct-upload avatar → S3
-- [ ] Optional: CloudFront for delivery
+- billing-consumer
 
-### Frontend Work
+- auth-consumer
 
-- [ ] Create "Settings" page
-- [ ] Change name/email/password
-- [ ] Toggle dark mode / language
-- [ ] Avatar upload using presigned URL
-- [ ] Save avatar URL in user profile
+### Workflow (Happy Path)
 
----
+1. POST /orders (api-gateway)
 
-## 🧾 Phase 4 — Audit Log Service (Ts.ED)
+2. order_created event is published
 
-### Audit Service
+3. billing consumes order_created
 
-- [ ] Create `/audit-service-tsed`
-- [ ] Consume Kafka events
-- [ ] Store `UserCreated`, `UserUpdated`, `LoginFailed`, `ProfileUpdated`
-- [ ] Expose `GET /audit/logs`
+4. billing sends a get_user request
 
-### UI for Audit Logs
+5. auth responds to get_user
 
-- [ ] Create "Audit Logs" admin page in React
-- [ ] Table of events with filters
+6. billing logs:
+   Billing user with stripe ID ... a price of $...
 
----
+Important
 
-## 🔔 Phase 5 — Notification Templates (NestJS + Amazon SES)
+- order_created is implemented as an event (emit + @EventPattern)
 
-### Notification Service Enhancements
+- get_user is implemented as RPC over Kafka (send + @MessagePattern)
 
-- [ ] Add simple template engine (Pug)
-- [ ] Create templates:
-  - [ ] Welcome email
-  - [ ] Profile updated email
-  - [ ] Password reset email
-- [ ] Consume events via Kafka and trigger SES send
+### Expected Logs
 
----
+#### api-gateway
 
-## 🚩 Phase 6 — Feature Flags (Ts.ED)
+Publication of the order_created event
+(internally creates an OrderCreatedEvent)
 
-### Backend Ts.ED
+#### billing
 
-- [ ] `GET /flags` for current flags
-- [ ] `POST /flags` to update flags
-- [ ] Store flags in DynamoDB
+Received order_created event with data: ...
 
-### Frontend MFE3
+Billing user with stripe ID ... a price of $...
 
-- [ ] Load flags on app startup
-- [ ] Show/hide MFE3 based on `enableMFE3` flag
+#### auth
 
----
+Returning user for userId
 
-## 📊 Phase 7 — Public API Dashboard + Observability
+## Repository Structure
 
-### Backend API Dashboard
+```md
+.
+├── api-gateway/
+├── billing/
+└── auth/
+```
 
-- [ ] Add `/system/status` endpoint in API Gateway
-- [ ] Basic health checks for services
+Each directory is an independent NestJS project with its own package.json.
 
-### Frontend API Dashboard
+### Prerequisites
 
-- [ ] Create "API Dashboard" page
-- [ ] Show:
-  - Service status
-  - Versions
-  - Recent events
+- Node.js (recommended version 18+)
+- Docker & Docker Compose
+- NestJS CLI
 
-### Observability
+```bash
+npm install -g @nestjs/cli
+```
 
-- [ ] Add OTel tracing to:
-  - API Gateway
-  - User Service
-  - GraphQL Service
-- [ ] Simple logs + metrics forwarding to console or local collector
+- Kafka
 
----
-
-## 🧪 Phase 8 — CI/CD Basics
-
-### GitHub Actions
-
-- [ ] Monorepo pipeline
-- [ ] Install deps
-- [ ] Run tests
-- [ ] Build for:
-  - User Service
-  - Auth Service
-  - GraphQL Service
-  - Frontend
-
-### Docker
-
-- [ ] Build Docker images in CI
-- [ ] Optional: Push to GHCR
-
----
-
-## 🏁 End of Roadmap v0.4
-
-This file will evolve into **ROADMAP v1.0** once foundational services are built.
+```bash
+docker run -p 9092:9092 apache/kafka-native:4.0.0
+```
