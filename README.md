@@ -184,6 +184,14 @@ npm install -g @nestjs/cli
 
 - Kafka
 
+Simple configuration:
+
 ```bash
 docker run -p 9092:9092 apache/kafka-native:4.0.0
+```
+
+Complex configuration:
+
+```bash
+docker-compose -f docker-compose-kafka.yml up
 ```
