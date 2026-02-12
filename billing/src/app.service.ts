@@ -26,18 +26,4 @@ export class AppService {
         );
       });
   }
-  // handleOrderCreated(orderCreatedEvent: OrderCreatedEvent) {
-  //   console.log({ orderCreatedEvent });
-  //   if (!orderCreatedEvent.userId) {
-  //     console.log('No userId provided in orderCreatedEvent');
-  //     return;
-  //   }
-  //   this.authClient
-  //     .send('get_user', new GetUserRequest(orderCreatedEvent.userId))
-  //     .subscribe((user: { stripeUserId: string }) => {
-  //       console.log(
-  //         `Billing user with stripe ID ${user.stripeUserId} a price of $${orderCreatedEvent.price}...`,
-  //       );
-  //     });
-  // }
 }
